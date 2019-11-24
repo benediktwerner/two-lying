@@ -6,6 +6,13 @@ from aiohttp import web
 import ws_handler
 
 
+def redirect_handler(target):
+    async def handler(request):
+        raise web.HTTPFound(target)
+
+    return handler
+
+
 async def socket_handler(request):
     ws = web.WebSocketResponse()
     await ws.prepare(request)
@@ -28,9 +35,9 @@ async def socket_handler(request):
 app = web.Application()
 app.add_routes(
     [
-        web.static("/", "index.html"),
-        web.static("/index.js", "index.js"),
+        web.get("/", redirect_handler("/index.html")),
         web.get("/socket", socket_handler),
+        web.static("/", "static"),
     ]
 )
 

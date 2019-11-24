@@ -18,7 +18,7 @@ async def handle(ws, msg):
     if not msg:
         return
     
-    send(ws, "Echo: " + msg)
+    await send(ws, "Echo: " + msg)
 
     # if msg[0] == "!":
     #     msg = json.loads(msg[1:])
