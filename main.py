@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 
+import os
+
 import aiohttp
 from aiohttp import web
 
 import ws_handler
+
+
+PORT = int(os.environ.get("PORT", "8080"))
 
 
 def redirect_handler(target):
@@ -41,4 +46,4 @@ app.add_routes(
     ]
 )
 
-web.run_app(app)
+web.run_app(app, port=PORT)
