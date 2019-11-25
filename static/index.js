@@ -7,112 +7,161 @@ Element.prototype.$ = function(cls) {
   return this.getElementsByClassName(cls)[0];
 };
 
-let ws;
+Element.prototype.removeChildren = function() {
+  while (this.firstChild) this.removeChild(this.firstChild);
+};
 
-// function openWebsocket() {
-//   ws = new WebSocket(`ws://${window.location.host}/socket`);
+function toInt(val) {
+  const result = parseInt(val);
+  if (isNaN(result)) return 0;
+  return result;
+}
 
-//   ws.onopen = onWebsocketInit;
-//   ws.onmessage = onWebsocketMessage;
-// }
+let ws, myIndex;
 
-// function onWebsocketInit() {
-//   send('init');
-// }
+function login(name) {
+  if (window.location.protocol === 'https://')
+    ws = new WebSocket(`wss://${window.location.host}/socket`);
+  else ws = new WebSocket(`ws://${window.location.host}/socket`);
 
-// function onWebsocketMessage(e) {
-//   const { data, type } = JSON.parse(e.data);
+  ws.onopen = () => send('login', name);
+  ws.onmessage = onWebsocketMessage;
+  ws.onclose = () => window.location.reload();
+}
 
-//   if (type === 'msg') {
-//     addMessage(data);
-//   } else if (type === 'data') {
-//     if (data.players) {
-//       let money = { copper: 0, silver: 0, gold: 0, electrum: 0, platin: 0 };
+function onWebsocketMessage(e) {
+  /**
+   *  {
+   *    players: [
+   *      {
+   *        name: "Hans",
+   *        points: 3,
+   *        status: "ready", // "not-ready", "guesser"
+   *      }
+   *    ],
+   *    you: {
+   *      index: 0,
+   *      word: "Tree",
+   *    },
+   *    waiting: false,
+   *    word: null,
+   *  }
+   */
+  const data = JSON.parse(e.data);
+  let allReady = true;
+  console.log(data);
 
-//       $$('.player').forEach(p => p.remove());
-//       const playerTemplate = $('#player-template').content;
-//       for (const i in data.players) {
-//         const p = data.players[i];
+  // Hide login screen
+  $('#login').classList.add('hidden');
+  $('#game').classList.remove('hidden');
 
-//         const newPlayer = playerTemplate.cloneNode(true);
-//         const node = newPlayer.firstElementChild;
-//         node.id = 'player-' + i;
+  // Set player sidebar
+  const playersEle = $('#players');
+  playersEle.removeChildren();
+  for (const player of data.players) {
+    const playerEle = document.createElement('li');
+    playersEle.appendChild(playerEle);
+    playerEle.innerText = player.name;
 
-//         for (const key in p) {
-//           node.$(key).innerText = p[key];
-//           if (key in money) money[key] += p[key];
-//         }
+    if (player.status === 'ready') playerEle.classList.add('player-ready');
+    else if (player.status === 'guesser') playerEle.classList.add('player-guesser');
+    else if (player.status === 'disconnected') playerEle.classList.add('player-disconnected');
+    else allReady = false;
 
-//         $('.players').appendChild(newPlayer);
-//       }
+    const pointsEle = document.createElement('span');
+    pointsEle.classList.add('player-points');
+    pointsEle.innerText = player.points;
+    playerEle.appendChild(pointsEle);
+  }
 
-//       for (const key in money) {
-//         $('.total').$(key).innerText = money[key];
-//       }
-//     }
-//     if (data.map_images) {
-//       $$('#map-bg option:not(.default)').forEach(el => el.remove());
+  myIndex = data.you.index;
+  const me = data.players[myIndex];
+  const mainEle = $('#main');
 
-//       for (let bg of data.map_images) {
-//         const el = document.createElement('option');
-//         el.value = '/img/maps/' + bg;
-//         el.innerText = bg
-//           .split('.')
-//           .slice(0, -1)
-//           .join(' ');
-//         $('#map-bg').appendChild(el);
-//       }
-//     }
-//     if (data.map) {
-//       map.lines = data.map.lines;
-//       map.bg_image.src = data.map.bg_image;
-//       map.grid_size = data.map.grid_size;
-//       map.grid_x = data.map.grid_x;
-//       map.grid_y = data.map.grid_y;
-//       map.units = data.map.units;
-//       map.visible_areas = data.map.visible_areas;
-//       $('#map-bg').value = data.map.bg_image;
-//       $('#grid-size').value = map.grid_size;
-//       $('#grid-x').value = map.grid_x;
-//       $('#grid-y').value = map.grid_y;
-//       requestAnimationFrame(renderMap);
-//     }
-//     if (data.maps) {
-//       maps = data.maps;
-//     }
-//     if (data.initiative) {
-//       $$('.initiative-bar .initiative-cell').forEach(el => el.remove());
-//       const template = $('#initiative-cell-template');
+  mainEle.className = '';
 
-//       for (const unit of data.initiative.units) {
-//         const newEl = template.content.cloneNode(true);
-//         newEl.firstElementChild.$('name').innerText = unit.name;
-//         newEl.firstElementChild.$('initiative').innerText = unit.initiative;
-//         $('.initiative-bar').appendChild(newEl);
-//       }
+  if (data.waiting) {
+    mainEle.classList.add('waiting');
+  } else if (data.word === null) {
+    if (me.status === 'guesser') {
+      mainEle.classList.add('guesser');
+      $('#btn-choose-word').disabled = !allReady;
+    } else {
+      mainEle.classList.add('liar');
+      if (data.you.word) {
+        $('#liar-my-word').innerText = 'Your word is: ' + data.you.word;
+        mainEle.classList.add('liar-status');
+        if (me.status === 'ready') {
+          mainEle.classList.add('liar-ready');
+        }
+      }
+    }
+  } else {
+    if (me.status === 'guesser') {
+      mainEle.classList.add('guesser-word');
+      $('#guesser-word').innerText = 'The word is: ' + data.word;
+      const choicesEle = $('#guesser-players');
+      choicesEle.removeChildren();
+      for (const i in data.players) {
+        const player = data.players[i];
+        if (player.status !== 'guesser') {
+          const choiceEle = document.createElement('button');
+          choiceEle.type = 'button';
+          choiceEle.innerText = player.name;
+          choiceEle.addEventListener('click', () => send('guess', toInt(i)));
+          choicesEle.appendChild(choiceEle);
+        }
+      }
+    } else {
+      mainEle.classList.add('liar-word');
+      $('#liar-word').innerText = 'The word is: ' + data.word;
+    }
+  }
+}
 
-//       const activeIndex = data.initiative.activeIndex + 1;
-//       $(`.initiative-bar .initiative-cell:nth-child(${activeIndex})`).classList.add('active');
-//     }
-//     closeDialog();
-//   } else if (type === 'initiative-index') {
-//     $$('.initiative-bar .initiative-cell').forEach(el => el.classList.remove('active'));
-//     $(`.initiative-bar .initiative-cell:nth-child(${data + 1})`).classList.add('active');
-//   }
-// }
+function send(type, data = null) {
+  if (ws.readyState !== WebSocket.OPEN) {
+    console.error('WebSocket geschlossen');
+    return;
+  }
+  const msg = JSON.stringify({ type, data });
+  console.log('Sending: ' + msg);
+  ws.send(msg);
+}
 
-// function send(type, data) {
-//   if (ws.readyState !== WebSocket.OPEN) {
-//     console.error('WebSocket geschlossen');
-//     return;
-//   }
-//   if (data === undefined) {
-//     ws.send(type);
-//   } else {
-//     const msg = '!' + JSON.stringify({ type, data });
-//     console.log('Sending: ' + msg);
-//     ws.send(msg);
-//   }
-// }
-
-console.log("loaded");
+document.addEventListener('DOMContentLoaded', function() {
+  $('#login-form').addEventListener(
+    'submit',
+    function(event) {
+      event.preventDefault();
+      const name = $('#login-name').value;
+      if (name) {
+        login(name);
+      }
+    },
+    false
+  );
+  $('#btn-start-game').addEventListener('click', function() {
+    send('start-game');
+  });
+  $('#btn-choose-word').addEventListener('click', function() {
+    send('choose-word');
+  });
+  $('#btn-liar-ready').addEventListener('click', function() {
+    send('ready', myIndex);
+  });
+  $('#btn-liar-not-ready').addEventListener('click', function() {
+    send('not-ready', myIndex);
+  });
+  $('#form-set-word').addEventListener(
+    'submit',
+    function(event) {
+      event.preventDefault();
+      send('set-word', {
+        index: myIndex,
+        word: $('#my-word').value,
+      });
+    },
+    false
+  );
+});
