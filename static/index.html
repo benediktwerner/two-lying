@@ -21,6 +21,8 @@
         justify-content: center;
         align-items: center;
         flex-direction: column;
+        padding: 20px;
+        text-align: center;
       }
       input[type='text'] {
         height: 25px;
@@ -41,6 +43,7 @@
       #sidebar {
         padding-left: 20px;
         padding-right: 20px;
+        padding-bottom: 20px;
         background-color: #292c2f;
         color: #a1adb8;
       }
@@ -110,6 +113,7 @@
       }
       #guesser-players > button {
         margin-right: 30px;
+        margin-top: 5px;
         width: 120px;
         height: 40px;
         font-size: 1.1rem;
@@ -117,6 +121,16 @@
       #btn-liar-ready,
       #btn-liar-not-ready {
         margin-left: 30px;
+      }
+      @media (max-width: 650px) {
+        #game {
+          grid-template-columns: auto;
+          grid-template-rows: min-content auto;
+        }
+        #main {
+          padding-left: 20px;
+          padding-right: 20px;
+        }
       }
     </style>
   </head>
@@ -141,6 +155,7 @@
       <div id="main">
         <!-- class="waiting|guesser|guesser-word|liar(+liar-status(+liar-ready))|liar-word" -->
         <h1>Two of those people are lying!</h1>
+
         <div id="main-waiting">
           <h2>Waiting for players ...</h2>
           <button type="button" id="btn-start-game">Start game</button>
