@@ -20,7 +20,7 @@ function toInt(val) {
 let ws, myIndex;
 
 function login(name) {
-  if (window.location.protocol === 'https://')
+  if (window.location.protocol === 'https:')
     ws = new WebSocket(`wss://${window.location.host}/socket`);
   else ws = new WebSocket(`ws://${window.location.host}/socket`);
 
