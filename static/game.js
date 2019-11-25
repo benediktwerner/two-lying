@@ -17,17 +17,7 @@ function toInt(val) {
   return result;
 }
 
-let ws, myIndex;
-
-function login(name) {
-  if (window.location.protocol === 'https:')
-    ws = new WebSocket(`wss://${window.location.host}/socket`);
-  else ws = new WebSocket(`ws://${window.location.host}/socket`);
-
-  ws.onopen = () => send('login', name);
-  ws.onmessage = onWebsocketMessage;
-  ws.onclose = () => window.location.reload();
-}
+let ws;
 
 function onWebsocketMessage(e) {
   /**
@@ -39,6 +29,7 @@ function onWebsocketMessage(e) {
    *        status: "ready", // "not-ready", "guesser"
    *      }
    *    ],
+   *    roomId: "abc123",
    *    you: {
    *      index: 0,
    *      word: "Tree",
@@ -48,14 +39,17 @@ function onWebsocketMessage(e) {
    *  }
    */
   const data = JSON.parse(e.data);
-  let allReady = true;
   console.log(data);
 
-  // Hide login screen
-  $('#login').classList.add('hidden');
-  $('#game').classList.remove('hidden');
+  if (data.error) {
+    alert('Error: ' + data.error);
+    if (data.reload) window.location = './index.html';
+  }
 
-  // Set player sidebar
+  let allReady = true;
+
+  // Set sidebar
+  $('#room-id').innerText = 'Room: ' + data.roomId;
   const playersEle = $('#players');
   playersEle.removeChildren();
   for (const player of data.players) {
@@ -74,8 +68,7 @@ function onWebsocketMessage(e) {
     playerEle.appendChild(pointsEle);
   }
 
-  myIndex = data.you.index;
-  const me = data.players[myIndex];
+  const me = data.players[data.you.index];
   const mainEle = $('#main');
 
   mainEle.className = '';
@@ -108,7 +101,7 @@ function onWebsocketMessage(e) {
           const choiceEle = document.createElement('button');
           choiceEle.type = 'button';
           choiceEle.innerText = player.name;
-          choiceEle.addEventListener('click', () => send('guess', toInt(i)));
+          choiceEle.addEventListener('click', () => send('guess', { index: toInt(i) }));
           choicesEle.appendChild(choiceEle);
         }
       }
@@ -119,7 +112,7 @@ function onWebsocketMessage(e) {
   }
 }
 
-function send(type, data = null) {
+function send(type, data) {
   if (ws.readyState !== WebSocket.OPEN) {
     console.error('WebSocket geschlossen');
     return;
@@ -130,37 +123,34 @@ function send(type, data = null) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  $('#login-form').addEventListener(
-    'submit',
-    function(event) {
-      event.preventDefault();
-      const name = $('#login-name').value;
-      if (name) {
-        login(name);
-      }
-    },
-    false
-  );
-  $('#btn-start-game').addEventListener('click', function() {
-    send('start-game');
-  });
-  $('#btn-choose-word').addEventListener('click', function() {
-    send('choose-word');
-  });
-  $('#btn-liar-ready').addEventListener('click', function() {
-    send('ready', myIndex);
-  });
-  $('#btn-liar-not-ready').addEventListener('click', function() {
-    send('not-ready', myIndex);
-  });
+  if (window.location.protocol === 'https:')
+    ws = new WebSocket(`wss://${window.location.host}/socket`);
+  else ws = new WebSocket(`ws://${window.location.host}/socket`);
+
+  const url = new URL(window.location);
+  const name = url.searchParams.get('name');
+  const roomId = url.searchParams.get('roomId');
+
+  ws.onopen = () =>
+    send('join', {
+      name,
+      roomId,
+    });
+  ws.onmessage = onWebsocketMessage;
+  ws.onclose = () => (window.location = './index.html');
+
+  $('#btn-start-game').addEventListener('click', () => send('start-game'));
+  $('#btn-choose-word').addEventListener('click', () => send('choose-word'));
+  $('#btn-liar-ready').addEventListener('click', () => send('ready'));
+  $('#btn-liar-not-ready').addEventListener('click', () => send('not-ready'));
   $('#form-set-word').addEventListener(
     'submit',
     function(event) {
       event.preventDefault();
-      send('set-word', {
-        index: myIndex,
-        word: $('#my-word').value,
-      });
+      const wordEle = $('#my-word');
+      const word = wordEle.value;
+      wordEle.value = '';
+      send('set-word', { word });
     },
     false
   );

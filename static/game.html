@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Two of those people are lying!</title>
+
+    <style>
+      body {
+        font-family: 'Open Sans';
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        background-color: hsl(200, 7%, 8%);
+        color: #98a3ad;
+      }
+      input[type='text'] {
+        height: 25px;
+      }
+      button {
+        height: 30px;
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+      #main-container {
+        height: 100%;
+        display: grid;
+        grid-template-columns: 250px auto;
+      }
+      #sidebar {
+        padding-left: 20px;
+        padding-right: 20px;
+        padding-bottom: 20px;
+        background-color: #292c2f;
+        color: #a1adb8;
+      }
+      #main {
+        padding-left: 50px;
+        padding-right: 50px;
+      }
+      ul#players {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      ul#players > li {
+        padding-left: 1rem;
+        text-indent: -0.7rem;
+      }
+      ul#players > li::before {
+        content: '❌ ';
+      }
+      ul#players > li.player-guesser::before {
+        content: '🙈 ';
+      }
+      ul#players > li.player-ready::before {
+        content: '✔️ ';
+      }
+      ul#players > li.player-disconnected::before {
+        content: '⌛ ';
+      }
+      .player-points {
+        float: right;
+      }
+      #main-waiting,
+      #main-guesser,
+      #main-guesser-word,
+      #main-liar,
+      #main-liar-word,
+      #liar-status,
+      #liar-status-ready {
+        display: none;
+      }
+      #main.waiting #main-waiting {
+        display: initial;
+      }
+      #main.guesser #main-guesser {
+        display: initial;
+      }
+      #main.guesser-word #main-guesser-word {
+        display: initial;
+      }
+      #main.liar #main-liar {
+        display: initial;
+      }
+      #main.liar-word #main-liar-word {
+        display: initial;
+      }
+      #main.liar-status #liar-status {
+        display: initial;
+      }
+      #main.liar-status #liar-status {
+        display: initial;
+      }
+      #main.liar-ready #liar-status-ready {
+        display: initial;
+      }
+      #main.liar-ready #liar-status-not-ready {
+        display: none;
+      }
+      #guesser-players > button {
+        margin-right: 30px;
+        margin-top: 5px;
+        width: 120px;
+        height: 40px;
+        font-size: 1.1rem;
+      }
+      #btn-liar-ready,
+      #btn-liar-not-ready {
+        margin-left: 30px;
+      }
+      @media (max-width: 650px) {
+        #main-container {
+          grid-template-columns: auto;
+          grid-template-rows: min-content auto;
+        }
+        #main {
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="main-container">
+      <div id="sidebar">
+        <h4 id="room-id">Loading ...</h4>
+        <h2>Players</h2>
+        <ul id="players">
+          <!-- <li class="player-guesser">Player 1<span class="player-points">5</span></li>
+          <li class="player-ready">Player 2<span class="player-points">0</span></li>
+          <li>Player 3<span class="player-points">2</span></li> -->
+        </ul>
+      </div>
+      <div id="main">
+        <!-- class="waiting|guesser|guesser-word|liar(+liar-status(+liar-ready))|liar-word" -->
+        <h1>Two of those people are lying!</h1>
+
+        <div id="main-waiting">
+          <h2>Waiting for players ...</h2>
+          <button type="button" id="btn-start-game">Start game</button>
+        </div>
+
+        <div id="main-guesser">
+          <button type="button" id="btn-choose-word" disabled>Choose word</button>
+        </div>
+
+        <div id="main-guesser-word">
+          <h2 id="guesser-word">The word is: Tree</h2>
+          <div id="guesser-players">
+            <button type="button">Player 1</button>
+            <button type="button">Player 2</button>
+          </div>
+        </div>
+
+        <div id="main-liar">
+          <form id="form-set-word">
+            <input type="text" id="my-word" placeholder="Enter your article ..." />
+            <button type="submit">Set word</button>
+          </form>
+
+          <div id="liar-status">
+            <h2 id="liar-my-word">Your word is: Tree</h2>
+            <div id="liar-status-ready">
+              <b>You are ready ✔️</b>
+              <button type="button" id="btn-liar-not-ready">Not ready</button>
+            </div>
+            <div id="liar-status-not-ready">
+              <b>You are NOT ready ❌</b>
+              <button type="button" id="btn-liar-ready">Ready</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="main-liar-word">
+          <h2 id="liar-word">The word is: Tree</h2>
+        </div>
+      </div>
+    </div>
+
+    <script src="/game.js"></script>
+  </body>
+</html>
