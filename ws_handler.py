@@ -48,7 +48,7 @@ async def handle(ws, msg):
                 break
         else:
             players.append(
-                {"ws": ws, "name": name, "points": 0, "status": "ready", "word": None}
+                {"ws": ws, "name": name, "points": 0, "status": "not-ready", "word": None}
             )
     elif msg_type == "start-game":
         for p in players:
