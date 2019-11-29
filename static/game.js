@@ -75,6 +75,7 @@ function onWebsocketMessage(e) {
 
   if (data.waiting) {
     mainEle.classList.add('waiting');
+    $('#btn-start-game').disabled = data.players.length < 3;
   } else if (data.word === null) {
     if (me.status === 'guesser') {
       mainEle.classList.add('guesser');

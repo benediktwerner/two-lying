@@ -87,6 +87,8 @@ class Room:
                     self.current_player = None
                     break
             self.players = [p for p in self.players if p.ws is not None]
+            if len(self.players) < 3:
+                raise NoReloadException("Too few players")
             self.next_round()
         elif msg_type == "set-word":
             player.word = msg_data["word"]
