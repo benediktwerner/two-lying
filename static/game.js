@@ -17,7 +17,7 @@ function toInt(val) {
   return result;
 }
 
-let ws, pingInterval;
+let ws;
 
 function onWebsocketMessage(e) {
   /**
@@ -38,8 +38,6 @@ function onWebsocketMessage(e) {
    *    word: null,
    *  }
    */
-  if (e.data == 'pong') return;
-
   const data = JSON.parse(e.data);
   console.log(data);
 
@@ -137,18 +135,13 @@ document.addEventListener('DOMContentLoaded', function() {
   const name = url.searchParams.get('name');
   const roomId = url.searchParams.get('roomId');
 
-  ws.onopen = () => {
+  ws.onopen = () =>
     send('join', {
       name,
       roomId,
     });
-    pingInterval = setInterval(() => send('ping'), 30_000);
-  };
   ws.onmessage = onWebsocketMessage;
-  ws.onclose = () => {
-    clearInterval(pingInterval);
-    window.location = './index.html';
-  };
+  ws.onclose = () => (window.location = './index.html');
 
   $('#btn-start-game').addEventListener('click', () => send('start-game'));
   $('#btn-choose-word').addEventListener('click', () => send('choose-word'));

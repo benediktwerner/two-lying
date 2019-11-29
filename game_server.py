@@ -186,8 +186,6 @@ class Server:
                 raise ReloadException(f"Invalid join request for existing user: {msg}")
 
             self.sockets[ws] = room
-        elif msg_type == "ping":
-            await ws.send_str("pong")
         elif ws not in self.sockets:
             raise ReloadException(f"Invalid message before joining: {msg}")
         else:

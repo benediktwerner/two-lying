@@ -20,7 +20,7 @@ def redirect_handler(target):
 
 
 async def socket_handler(request):
-    ws = web.WebSocketResponse()
+    ws = web.WebSocketResponse(heartbeat=30)
     await ws.prepare(request)
 
     async for msg in ws:
