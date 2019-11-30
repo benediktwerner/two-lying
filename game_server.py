@@ -179,7 +179,8 @@ class Server:
 
             room = self.rooms.get(room_id)
             if room is None:
-                raise ReloadException(f"Invalid join request for unknown room: {msg}")
+                room = Room(room_id)
+                self.rooms[room_id]= room
 
             joined = await room.join(ws, name)
             if not joined:
