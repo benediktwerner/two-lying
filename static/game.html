@@ -5,10 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Two of those people are lying!</title>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Indie+Flower&display=swap"
+      rel="stylesheet"
+    />
+    <link href="./normalize.css" rel="stylesheet" />
 
     <style>
       body {
-        font-family: 'Open Sans';
+        font-family: 'Indie Flower', 'Open Sans', sans-serif;
         width: 100vw;
         height: 100vh;
         margin: 0;
@@ -16,12 +22,41 @@
         color: #98a3ad;
       }
       input[type='text'] {
-        height: 25px;
+        height: 26px;
+        border-radius: 0.15rem;
+        padding: 0.375rem 0.75rem 0.2rem 0.75rem;
+        font-weight: bold;
+        color: #98a3ad;
+        background-color: black;
+        border: 1px solid #787d82;
+        transition: border-color 200ms ease-in-out;
+      }
+      input[type='text']:focus {
+        outline: 0;
+        border-color: #ced4da;
       }
       button {
-        height: 30px;
+        font-family: 'Indie Flower', sans-serif;
+        font-weight: bold;
+        font-size: 1.2em;
+        height: 36px;
         padding-left: 10px;
         padding-right: 10px;
+        border-radius: 0.15rem;
+        color: #98a3ad;
+        background-color: black;
+        border: 1px solid #787d82;
+        transition: border-color 200ms ease-in-out, color 200ms ease-in-out;
+        cursor: pointer;
+      }
+      button:hover {
+        border-color: #ced4da;
+        color: #ced4da;
+      }
+      button:disabled {
+        cursor: not-allowed;
+        color: #52585f;
+        border-color: #484b4e;
       }
       #main-container {
         height: 100%;
@@ -104,11 +139,14 @@
         margin-top: 5px;
         width: 120px;
         height: 40px;
-        font-size: 1.1rem;
+        font-size: 1.4rem;
       }
       #btn-liar-ready,
       #btn-liar-not-ready {
         margin-left: 30px;
+      }
+      #room-id {
+        font-family: monospace;
       }
       @media (max-width: 650px) {
         #main-container {
@@ -125,7 +163,7 @@
   <body>
     <div id="main-container">
       <div id="sidebar">
-        <h4 id="room-id">Loading ...</h4>
+        <h2>Room: <span id="room-id">Loading...</span></h2>
         <h2>Players</h2>
         <ul id="players">
           <!-- <li class="player-guesser">Player 1<span class="player-points">5</span></li>
@@ -167,7 +205,7 @@
               <button type="button" id="btn-liar-not-ready">Not ready</button>
             </div>
             <div id="liar-status-not-ready">
-              <b>You are NOT ready ❌</b>
+              <b>You are <u>NOT</u> ready ❌</b>
               <button type="button" id="btn-liar-ready">Ready</button>
             </div>
           </div>

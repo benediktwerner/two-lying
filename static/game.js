@@ -52,7 +52,7 @@ function onWebsocketMessage(e) {
   let allReady = true;
 
   // Set sidebar
-  $('#room-id').innerText = 'Room: ' + data.roomId;
+  $('#room-id').innerText = data.roomId;
   const playersEle = $('#players');
   playersEle.removeChildren();
   for (const player of data.players) {
