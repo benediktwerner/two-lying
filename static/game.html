@@ -79,9 +79,10 @@
         padding: 0;
         margin: 0;
       }
-      ul#players > li {
-        padding-left: 1rem;
-        text-indent: -0.7rem;
+      ul#players > li::after {
+        content: "";
+        clear: both;
+        display: block;
       }
       ul#players > li::before {
         content: '❌ ';
@@ -96,6 +97,7 @@
         content: '⌛ ';
       }
       .player-points {
+        padding-left: 10px;
         float: right;
       }
       #main-waiting,
@@ -134,11 +136,14 @@
       #main.liar-ready #liar-status-not-ready {
         display: none;
       }
+      #guesser-players {
+        display: grid;
+        grid-auto-rows: 1fr;
+        grid-row-gap: 10px;
+        max-width: 250px;
+      }
       #guesser-players > button {
-        margin-right: 30px;
-        margin-top: 5px;
-        width: 120px;
-        height: 40px;
+        min-height: 40px;
         font-size: 1.4rem;
       }
       #btn-liar-ready,
@@ -166,9 +171,11 @@
         <h2>Room: <span id="room-id">Loading...</span></h2>
         <h2>Players</h2>
         <ul id="players">
-          <!-- <li class="player-guesser">Player 1<span class="player-points">5</span></li>
-          <li class="player-ready">Player 2<span class="player-points">0</span></li>
-          <li>Player 3<span class="player-points">2</span></li> -->
+          <!--
+            <li class="player-guesser">Player 1<span class="player-points">5</Player></li>
+            <li class="player-ready">Player 2<span class="player-points">0</span></li>
+            <li>Player 3<span class="player-points">2</span></li>
+          -->
         </ul>
       </div>
       <div id="main">
@@ -177,11 +184,11 @@
 
         <div id="main-waiting">
           <h2>Waiting for players ...</h2>
-          <button type="button" id="btn-start-game">Start game</button>
+          <button type="button" id="btn-start-game">Start Game</button>
         </div>
 
         <div id="main-guesser">
-          <button type="button" id="btn-choose-word" disabled>Choose word</button>
+          <button type="button" id="btn-choose-word" disabled>Choose Word</button>
         </div>
 
         <div id="main-guesser-word">
@@ -195,14 +202,14 @@
         <div id="main-liar">
           <form id="form-set-word">
             <input type="text" id="my-word" placeholder="Enter your article ..." />
-            <button type="submit">Set word</button>
+            <button type="submit">Set Word</button>
           </form>
 
           <div id="liar-status">
             <h2 id="liar-my-word">Your word is: Tree</h2>
             <div id="liar-status-ready">
               <b>You are ready ✔️</b>
-              <button type="button" id="btn-liar-not-ready">Not ready</button>
+              <button type="button" id="btn-liar-not-ready">Not Ready</button>
             </div>
             <div id="liar-status-not-ready">
               <b>You are <u>NOT</u> ready ❌</b>
