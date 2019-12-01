@@ -98,10 +98,10 @@ class Room:
             player.status = "not-ready"
         elif msg_type == "guess":
             index = msg_data["index"]
-            self.players[index].points += 1
-            self.players[index].word = None
             if self.word == self.players[index].word:
                 self.players[self.current_player].points += 1
+            self.players[index].points += 1
+            self.players[index].word = None
             self.next_round()
         elif msg_type == "choose-word":
             p = random.choice([p for p in self.players if p.status != "guesser"])
