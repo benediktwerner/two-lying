@@ -17,7 +17,7 @@ function toInt(val) {
   return result;
 }
 
-let ws;
+let ws, retries;
 
 function onWebsocketMessage(e) {
   /**
@@ -134,14 +134,21 @@ document.addEventListener('DOMContentLoaded', function() {
   const url = new URL(window.location);
   const name = url.searchParams.get('name');
   const roomId = url.searchParams.get('roomId');
+  retries = parseInt(url.searchParams.get('retries') || 0);
 
-  ws.onopen = () =>
+  ws.onopen = () => {
+    retries = 0;
     send('join', {
       name,
       roomId,
     });
+  };
   ws.onmessage = onWebsocketMessage;
-  ws.onclose = () => (window.location = './index.html');
+  ws.onclose = () => {
+    if (retries > 3) window.location = './index.html';
+    url.searchParams.set('retries', retries + 1);
+    window.location = url;
+  };
 
   $('#btn-start-game').addEventListener('click', () => send('start-game'));
   $('#btn-choose-word').addEventListener('click', () => send('choose-word'));
