@@ -20,33 +20,35 @@ def redirect_handler(target):
 
 
 async def socket_handler(request):
-    ws = web.WebSocketResponse(heartbeat=30)
+    ws = web.WebSocketResponse(heartbeat=10)
     await ws.prepare(request)
 
-    async for msg in ws:
-        if msg.type == aiohttp.WSMsgType.TEXT:
-            if msg.data == "close":
-                await ws.close()
-            else:
-                try:
-                    await server.handle_socket_msg(ws, msg.data)
-                except ReloadException as e:
-                    print("Error during msg handling:")
-                    print(e.args[0])
-                    await ws.send_str(json.dumps({"error": e.args[0], "reload": True}))
-                except NoReloadException as e:
-                    print("Error during msg handling:")
-                    print(e.args[0])
-                    await ws.send_str(json.dumps({"error": e.args[0]}))
-                except Exception as e:
-                    print("Unhandled exception during msg handling:")
-                    print(e)
-                    await ws.send_str(json.dumps({"error": "Internal error"}))
-        elif msg.type == aiohttp.WSMsgType.ERROR:
-            print(f"Websocket closed with exception {ws.exception()}")
+    try:
+        async for msg in ws:
+            if msg.type == aiohttp.WSMsgType.TEXT:
+                if msg.data == "close":
+                    await ws.close()
+                else:
+                    try:
+                        await server.handle_socket_msg(ws, msg.data)
+                    except ReloadException as e:
+                        print("Error during msg handling:")
+                        print(e.args[0])
+                        await ws.send_str(json.dumps({"error": e.args[0], "reload": True}))
+                    except NoReloadException as e:
+                        print("Error during msg handling:")
+                        print(e.args[0])
+                        await ws.send_str(json.dumps({"error": e.args[0]}))
+                    except Exception as e:
+                        print("Unhandled exception during msg handling:")
+                        print(e)
+                        await ws.send_str(json.dumps({"error": "Internal error"}))
+            elif msg.type == aiohttp.WSMsgType.ERROR:
+                print(f"Websocket closed with exception {ws.exception()}")
+    finally:
+        await server.disconnect_socket(ws)
+        print("Websocket closed")
 
-    await server.disconnect_socket(ws)
-    print("Websocket closed")
     return ws
 
 
